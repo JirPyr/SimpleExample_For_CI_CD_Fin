@@ -34,7 +34,7 @@ public class UsersController : ControllerBase
         UserDto? user = await _userService.GetByIdAsync(id);
         if (user == null)
         {
-            return NotFound(new { message = $"User with ID {id} not found" });
+            return NotFound(new { message = $"Userss with ID {id} not found" });
         }
         return Ok(user);
     }
