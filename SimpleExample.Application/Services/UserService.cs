@@ -27,12 +27,11 @@ public class UserService : IUserService
 
     public async Task<UserDto> CreateAsync(CreateUserDto createUserDto)
     {
-        User user = new User
-        {
-            FirstName = createUserDto.FirstName,
-            LastName = createUserDto.LastName,
-            Email = createUserDto.Email
-        };
+        User user = new User(
+            createUserDto.FirstName,
+            createUserDto.LastName,
+            createUserDto.Email
+        );
 
         User createdUser = await _userRepository.AddAsync(user);
         return MapToDto(createdUser);
@@ -46,9 +45,8 @@ public class UserService : IUserService
             return null;
         }
 
-        user.FirstName = updateUserDto.FirstName;
-        user.LastName = updateUserDto.LastName;
-        user.Email = updateUserDto.Email;
+        user.UpdateBasicInfo(updateUserDto.FirstName, updateUserDto.LastName);
+        user.UpdateEmail(updateUserDto.Email);
 
         User updatedUser = await _userRepository.UpdateAsync(user);
         return MapToDto(updatedUser);
@@ -56,8 +54,9 @@ public class UserService : IUserService
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-        bool exists = await _userRepository.ExistsAsync(id);
-        if (!exists)
+        User? user = await _userRepository.GetByIdAsync(id);
+
+        if (user == null)
         {
             return false;
         }

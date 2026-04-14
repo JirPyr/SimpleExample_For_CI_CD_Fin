@@ -34,7 +34,7 @@ public class UsersController : ControllerBase
         UserDto? user = await _userService.GetByIdAsync(id);
         if (user == null)
         {
-            return NotFound(new { message = $"Userss with ID {id} not found" });
+            return NotFound(new { message = $"User with ID {id} not found" });
         }
         return Ok(user);
     }
@@ -45,32 +45,34 @@ public class UsersController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<UserDto>> Create([FromBody] CreateUserDto createUserDto)
     {
-        if (!ModelState.IsValid)
+        try
         {
-            return BadRequest(ModelState);
+            UserDto user = await _userService.CreateAsync(createUserDto);
+            return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
         }
-
-        UserDto user = await _userService.CreateAsync(createUserDto);
-        return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
-    /// <summary>
-    /// Update an existing user
-    /// </summary>
     [HttpPut("{id}")]
     public async Task<ActionResult<UserDto>> Update(Guid id, [FromBody] UpdateUserDto updateUserDto)
     {
-        if (!ModelState.IsValid)
+        try
         {
-            return BadRequest(ModelState);
-        }
+            UserDto? user = await _userService.UpdateAsync(id, updateUserDto);
+            if (user == null)
+            {
+                return NotFound(new { message = $"User with ID {id} not found" });
+            }
 
-        UserDto? user = await _userService.UpdateAsync(id, updateUserDto);
-        if (user == null)
-        {
-            return NotFound(new { message = $"User with ID {id} not found" });
+            return Ok(user);
         }
-        return Ok(user);
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     /// <summary>
