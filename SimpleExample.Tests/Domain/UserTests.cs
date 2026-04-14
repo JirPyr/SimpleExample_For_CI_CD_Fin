@@ -23,8 +23,8 @@ public class UserTests
     {
         Action act = () => new User("", "Meikäläinen", "test@test.com");
 
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*Etunimi ei voi olla tyhjä*");
+        ArgumentException ex = act.Should().Throw<ArgumentException>().Which;
+        ex.ParamName.Should().Be("firstName");
     }
 
     [Fact]
@@ -32,8 +32,8 @@ public class UserTests
     {
         Action act = () => new User("AB", "Meikäläinen", "test@test.com");
 
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*Etunimen tulee olla vähintään 3 merkkiä pitkä*");
+        ArgumentException ex = act.Should().Throw<ArgumentException>().Which;
+        ex.ParamName.Should().Be("firstName");
     }
 
     [Fact]
@@ -41,8 +41,8 @@ public class UserTests
     {
         Action act = () => new User("Matti", "", "test@test.com");
 
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*Sukunimi ei voi olla tyhjä*");
+        ArgumentException ex = act.Should().Throw<ArgumentException>().Which;
+        ex.ParamName.Should().Be("lastName");
     }
 
     [Fact]
@@ -50,8 +50,8 @@ public class UserTests
     {
         Action act = () => new User("Matti", "XY", "test@test.com");
 
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*Sukunimen tulee olla vähintään 3 merkkiä pitkä*");
+        ArgumentException ex = act.Should().Throw<ArgumentException>().Which;
+        ex.ParamName.Should().Be("lastName");
     }
 
     [Fact]
@@ -59,8 +59,8 @@ public class UserTests
     {
         Action act = () => new User("Matti", "Meikäläinen", "invalid-email");
 
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*Sähköpostin tulee olla kelvollinen*");
+        ArgumentException ex = act.Should().Throw<ArgumentException>().Which;
+        ex.ParamName.Should().Be("email");
     }
 
     [Fact]
@@ -100,8 +100,8 @@ public class UserTests
 
         Action act = () => user.UpdateBasicInfo("AB", "Virtanen");
 
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*Etunimen tulee olla vähintään 3 merkkiä pitkä*");
+        ArgumentException ex = act.Should().Throw<ArgumentException>().Which;
+        ex.ParamName.Should().Be("firstName");
     }
 
     [Fact]
@@ -121,7 +121,7 @@ public class UserTests
 
         Action act = () => user.UpdateEmail("invalid-email");
 
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*Sähköpostin tulee olla kelvollinen*");
+        ArgumentException ex = act.Should().Throw<ArgumentException>().Which;
+        ex.ParamName.Should().Be("email");
     }
 }
