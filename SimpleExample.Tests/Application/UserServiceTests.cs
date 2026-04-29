@@ -32,6 +32,10 @@ public class UserServiceTests
 			Email = "matti@example.com"
 		};
 
+        _mockRepository
+			.Setup(x => x.GetByEmailAsync(dto.Email))
+			.ReturnsAsync((User?)null);
+
 		_mockRepository
 			.Setup(x => x.AddAsync(It.IsAny<User>()))
 			.ReturnsAsync((User user) =>
@@ -42,7 +46,7 @@ public class UserServiceTests
 				return user;
 			});
 
-		UserDto result = await _service.CreateAsync(dto);
+        UserDto result = await _service.CreateAsync(dto);
 
 		result.Should().NotBeNull();
 		result.FirstName.Should().Be("Matti");
@@ -212,5 +216,34 @@ public class UserServiceTests
 		bool result = await _service.DeleteAsync(userId);
 
 		result.Should().BeFalse();
+	}
+
+	[Fact]
+	public async Task CreateAsync_WithDuplicateEmail_ShouldThrowInvalidOperationException()
+	{
+		CreateUserDto dto = new CreateUserDto
+		{
+			FirstName = "Matti",
+			LastName = "Meikäläinen",
+			Email = "matti@example.com"
+		};
+
+		User existingUser = new User("Maija", "Virtanen", "matti@example.com")
+		{
+			Id = Guid.NewGuid(),
+			CreatedAt = DateTime.UtcNow,
+			UpdatedAt = DateTime.UtcNow
+		};
+
+		_mockRepository
+			.Setup(x => x.GetByEmailAsync(dto.Email))
+			.ReturnsAsync(existingUser);
+
+		Func<Task> act = async () => await _service.CreateAsync(dto);
+
+		await act.Should().ThrowAsync<InvalidOperationException>()
+			.WithMessage("*jo olemassa*");
+
+		_mockRepository.Verify(x => x.AddAsync(It.IsAny<User>()), Times.Never);
 	}
 }
